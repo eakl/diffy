@@ -8,9 +8,7 @@ JSON Diffing Algorithm
   - Trim it (common head and tail)
   - Test for singular Insertion / Deletion
   - If it doesn't solve the problem, test for TwoEdits
-  - If it doesn't solve the problem, test for TwoEdits2 (complex 2 edits)
   - If it doesn't solve the problem, apply the LCS algorithm
-3.
 
 
 https://neil.fraser.name/writing/diff/

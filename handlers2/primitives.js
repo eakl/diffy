@@ -3,7 +3,7 @@
 const { equal, typeOf } = require('../helpers/equal')
 const { diff } = require('./diff')
 
-function diffObject (obj1, obj2, path) {
+function diffPrimitive (obj1, obj2, path) {
   const events = {
     created: [ ],
     deleted: [ ],
@@ -12,16 +12,12 @@ function diffObject (obj1, obj2, path) {
 
   if (obj1 === undefined) {
     events.created.push(['DIFF_CREATE', path, obj2])
-    console.log(events)
-    return
     // return delta(events)
   }
 
   if (obj1 && typeOf(obj1) !== 'object') {
     events.deleted.push(['DIFF_DELETE', path, obj1]) // delete the object
     events.created.push(['DIFF_CREATE', path, obj2])
-    console.log(JSON.stringify(events, null, 2))
-    return
     // return delta(events)
   }
 

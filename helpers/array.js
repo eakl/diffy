@@ -214,7 +214,7 @@ function singleEdit (arr1, arr2, i) {
     return ['DIFF_INSERT', i, arr2]
   }
   else if (len1 !== 0 && len2 === 0) {
-    return ['DIFF_DELETE', i, arr1]
+    return ['DIFF_REMOVE', i, arr1]
   }
   else {
     return null
@@ -240,7 +240,7 @@ function twoEdits (arr1, arr2, iH) {
 
     // Swap insertions for deletions if diff is reversed.
     if (arr1.length > arr2.length) {
-      diffs[0][0] = diffs[2][0] = 'DIFF_DELETE'
+      diffs[0][0] = diffs[2][0] = 'DIFF_REMOVE'
       diffs[2][1] += edit1.length // Change the index when it's a delete
     }
 
