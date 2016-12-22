@@ -41,7 +41,6 @@ const events = {
 diff(before, after, null, [], events)
 
 function diff (o1, o2, node, path, events) {
-  node = !isNaN(parseInt(node, 10)) ? parseInt(node, 10) : node
 
   const p = node ? path.concat(node) : path
 
@@ -55,6 +54,24 @@ function diff (o1, o2, node, path, events) {
       }
     }
     else {
+
+      for (let n1 in oKeys1) {
+        if (o2[n1] === undefined) {
+          // Deletion
+          return diffObject(o1[n1], o2[n1], p.length === 0 ? p.concat(n1) : p, events)
+        }
+      }
+
+      for (let n2 in oKeys2) {
+        if (o1[n2] === undefined) {
+          // Insertion
+          return diffObject(o1[n2], o2[n2], p.length === 0 ? p.concat(n2) : p, events)
+        }
+      }
+
+
+
+
       return oKeys.map(n => {
         if (equal(o2[oKeys[n]], o1[oKeys[n]]))
 
@@ -65,6 +82,7 @@ function diff (o1, o2, node, path, events) {
 
   if (typeOf(o2) === 'array') {
     if (!equal(o1, o2)) {
+      node = !isNaN(parseInt(node, 10)) ? parseInt(node, 10) : node
       n = !isNaN(parseInt(n, 10)) ? parseInt(n, 10) : n
       return diffArray(o1, o2, p.length === 0 ? p.concat(node) : p)
     }
