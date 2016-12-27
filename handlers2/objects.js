@@ -3,116 +3,45 @@
 const { equal, typeOf } = require('../helpers/equal')
 const { diff } = require('./diff')
 
-function diffObject (obj1, obj2, path) {
-  const events = {
-    created: [ ],
-    deleted: [ ],
-    updated: [ ]
-  }
+function diffObject (o1, o2, path, events) {
 
-  if (obj1 === undefined) {
-    events.created.push(['DIFF_CREATE', path, obj2])
-    console.log(events)
-    return
+  if (o1 === undefined) {
+    events.created.push(['DIFF_CREATE', path, o2])
+    return events
     // return delta(events)
   }
 
-  if (obj1 && typeOf(obj1) !== 'object') {
-    events.deleted.push(['DIFF_DELETE', path, obj1]) // delete the object
-    events.created.push(['DIFF_CREATE', path, obj2])
-    console.log(JSON.stringify(events, null, 2))
-    return
+  if (o1 && typeOf(o1) !== 'object') {
+    events.deleted.push(['DIFF_DELETE', path, o1]) // delete the object
+    events.created.push(['DIFF_CREATE', path, o2])
+    return events
     // return delta(events)
   }
 
-  const oKeys1 = Object.keys(obj1)
-  const oKeys2 = Object.keys(obj2)
+  const oKeys1 = Object.keys(o1)
+  const oKeys2 = Object.keys(o2)
 
-  for (let i1 = 0; i1 < oKeys1.length; ++i1) {
-    const k1 = oKeys1[i1]
-
-    if(!equal(obj1[k1], obj2[k1])) {
-      if (obj2[k1] === undefined) {
-        events.deleted.push(['DIFF_DELETE', path.concat(k1), obj1[k1]])
-      }
+  for (let n1 in oKeys1) {
+    if (o2[n1] === undefined) {
+      // Deletion
+      events.deleted.push(['DIFF_DELETE', path, o1[n1]])
     }
   }
 
-  // oKeys2.forEach(k2 => {
-  //   if(!equal(obj1[k2], obj2[k2])) {
-  //     if (obj1[k2] === undefined) {
-  //       events.created.push(['DIFF_CREATE', path.concat(k2), obj2[k2]])
-  //     }
-  //     else if (obj1[k2] && typeof obj1[k2] !== 'object') {
-  //       events.updated.push(['DIFF_UPDATE', path.concat(k2), obj2[k2]])
-  //     }
-  //     else {
-  //       return diffObject(obj1[k2], obj2[k2], path.concat(k2))
-  //     }
-  //   }
-  // })
+  for (let n2 in oKeys2) {
+    if (o1[n2] === undefined) {
+      // Insertion
+      events.created.push(['DIFF_CREATE', path, o2[n2]])
+    }
 
-  for (let i2 = 0; i2 < oKeys2.length; ++i2) {
-    const k2 = oKeys2[i2]
-
-    if(!equal(obj1[k2], obj2[k2])) {
-      if (obj1[k2] === undefined) {
-        events.created.push(['DIFF_CREATE', path.concat(k2), obj2[k2]])
-        break
-      }
-      if (obj1[k2] && typeof obj1[k2] !== 'object') {
-        console.log('obj1.k2', obj1[k2])
-        for (let rI; rI < events.deleted; ++rI) {
-          const p1 = events.deleted[rI][1]
-          console.log('p1', p1)
-
-          console.log('haha', p1)
-          console.log('haha', path)
-
-          if (equal(p1, path)) {
-            events.updated.push(['DIFF_UPDATE', path.concat(k2), obj2[k2]])
-            events.removed.splice(rI, 1)
-          }
-        }
-      }
-      else {
-        return diffObject(obj1[k2], obj2[k2], path.concat(k2))
-      }
+    if (o1[n2] && !equal(o1[n2], o2[n2])) {
+      return diff(o1[n2], o2[n2], path.concat(n2), events)
     }
   }
 
-  //   if (equal(a1[i1 - hIdx], a2[i2 - hIdx])) {
-  //     events.moved.push(['DIFF_MOVE', path, i1, i2, arr2[i2]]) // One element only, no block
-  //     events.removed.splice(rI, 1)
-  //     isMove = true
-  //     break
-  //   }
-  // }
+  return events
 
-
-  // oKeys1.forEach(k1 => {
-  //   if(!equal(obj1[k1], obj2[k1])) {
-  //     if (obj2[k1] === undefined) {
-  //       events.deleted.push(['DIFF_DELETE', path.concat(k1), obj1[k1]])
-  //     }
-  //   }
-  // })
-
-  // oKeys2.forEach(k2 => {
-  //   if(!equal(obj1[k2], obj2[k2])) {
-  //     if (obj1[k2] === undefined) {
-  //       events.created.push(['DIFF_CREATE', path.concat(k2), obj2[k2]])
-  //     }
-  //     else if (obj1[k2] && typeof obj1[k2] !== 'object') {
-  //       events.updated.push(['DIFF_UPDATE', path.concat(k2), obj2[k2]])
-  //     }
-  //     else {
-  //       return diffObject(obj1[k2], obj2[k2], path.concat(k2))
-  //     }
-  //   }
-  // })
-
-  console.log(JSON.stringify(events, null, 2))
+  // console.log(JSON.stringify(events, null, 2))
   // return delta(events)
 }
 

@@ -51,8 +51,8 @@ function trim (arr1, arr2) {
   const tIdx2 = arr2.length - tailIdx(arr1, arr2)
 
   return {
-    arr1: arr1.slice(hIdx, tIdx1),
-    arr2: arr2.slice(hIdx, tIdx2),
+    tA1: arr1.slice(hIdx, tIdx1),
+    tA2: arr2.slice(hIdx, tIdx2),
     hIdx: hIdx,
     tIdx1: tIdx1,
     tIdx2: tIdx2
@@ -217,7 +217,7 @@ function singleEdit (arr1, arr2, i) {
     return ['DIFF_REMOVE', i, arr1]
   }
   else {
-    return null
+    return false
   }
 }
 
@@ -232,7 +232,7 @@ function twoEdits (arr1, arr2, iH) {
   const common = [ ...short ]
 
   if (i !== -1) {
-    const diffs = [
+    const diff = [
       ['DIFF_INSERT', iH, edit1],
       ['DIFF_EQUAL', null, common],
       ['DIFF_INSERT', iH + short.length, edit2]
@@ -240,14 +240,14 @@ function twoEdits (arr1, arr2, iH) {
 
     // Swap insertions for deletions if diff is reversed.
     if (arr1.length > arr2.length) {
-      diffs[0][0] = diffs[2][0] = 'DIFF_REMOVE'
-      diffs[2][1] += edit1.length // Change the index when it's a delete
+      diff[0][0] = diff[2][0] = 'DIFF_REMOVE'
+      diff[2][1] += edit1.length // Change the index when it's a delete
     }
 
-    return diffs
+    return diff
   }
   else {
-    return null
+    return false
   }
 }
 

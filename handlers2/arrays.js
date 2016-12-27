@@ -9,29 +9,18 @@ const { diffObject } = require('./objects')
 // const { delta } = require('../delta')
 // const { oldArray, newArray } = require('../tests/data/arrayOfIds')
 
-function diffArray (arr1, arr2, path) {
-
-  const events = {
-    created: [ ],
-    deleted: [ ],
-    updated: [ ],
-    added: [ ],
-    removed: [ ],
-    moved: [ ]
-  }
+function diffArray (arr1, arr2, path, events) {
 
   if (arr1 === undefined) {
     events.created.push(['DIFF_CREATE', path, arr2])
-    console.log('undefined', events)
-    return
+    return events
     // return delta(events)
   }
 
   // if (arr1 && typeOf(arr1) !== 'array') {
   //   events.deleted.push(['DIFF_DELETE', path, arr1])
   //   events.created.push(['DIFF_CREATE', path, arr2])
-  //   console.log('notarray', events)
-  //   return
+  //   return events
   //   // return delta(events)
   // }
 
@@ -44,19 +33,15 @@ function diffArray (arr1, arr2, path) {
 
   const sDiff = singleEdit(a1, a2, hIdx)
   if (sDiff) {
-    console.log('sDiff')
     events.updated.push(['DIFF_UPDATE', path, arr2, sDiff])
-    console.log('sDiff', events)
-    return
+    return events
     // return delta(events)
   }
 
   const tDiff = twoEdits(a1, a2, hIdx)
   if (tDiff) {
-    console.log('tDiff')
     events.updated.push(['DIFF_UPDATE', path, arr2, tDiff])
-    console.log('tDiff', events)
-    return
+    return events
     // return delta(events)
   }
 
@@ -83,27 +68,12 @@ function diffArray (arr1, arr2, path) {
         }
       }
       if (!isMove) {
-        if (typeOf(arr2[i2]) !== 'array' && typeOf(arr2[i2]) !== 'object') {
-          events.added.push(['DIFF_INSERT', path, i2, arr2[i2]]) // One element only, no block
-          break
-        }
-        else if (typeOf(arr2[i2]) === 'array') {
-          if (arr1[i2] !== undefined) {
-            return diffArray (arr1[i2], arr2[i2], path.concat(i2))
-          }
-          else {
-            events.added.push(['DIFF_INSERT', path, i2, arr2[i2]]) // One element only, no block
-          }
-        }
-        else if (typeOf(arr2[i2]) === 'object') {
-          if (arr1[i2] !== undefined) {
-            return diffObject(arr1[i2], arr2[i2], path.concat(i2))
-          }
-          else {
-            events.added.push(['DIFF_INSERT', path, i2, arr2[i2]]) // One element only, no block
-          }
-        }
+        events.added.push(['DIFF_INSERT', path, i2, arr2[i2]]) // One element only, no block
       }
+    }
+
+    if (arr1[i2] && !equal(arr1[i2], arr2[i2])) {
+      return diff(arr1[i2], arr2[i2], path.concat(i2), events)
     }
     // else {
     //   const i1 = lcsI1[isLcs2] + hIdx
@@ -112,48 +82,15 @@ function diffArray (arr1, arr2, path) {
     // }
   }
 
-  console.log(JSON.stringify(events, null, 2))
+  return events
+
+  // console.log(JSON.stringify(events, null, 2))
 
   // const diffs = [ ...removed, ...moved, ...added ]
 
   // return delta(diffs)
 
 }
-
-const arr1 = [
-  { key: 'k1', arr: ['un', 'deux'] },
-  { key: 'k2', arr: ['un', 'deux'] },
-  { key: 'k3', arr: ['un', 'deux'] },
-  { key: 'k4', arr: ['un', 'deux'] }
-]
-
-const arr2 = [
-  { key: 'k1', arr: ['un', 'deux'] },
-  { key: 'k3', arr: ['un', 'deux'] },
-  { key: 'k4', arr: ['un', 'deux'] },
-  { key: 'k2', arr: ['un', 'deux'] }
-]
-
-// diffArray(arr1, arr2, null)
-diffArray('hahaha', 'hovohhoa', [])
-
-
-
-
-
-
-
-
-
-// const arr1 = ['The', 'cat', 'in', 'lol', 'lol', 'the', 'hat']
-// const arr2 = ['The', 'cat', 'in', 'hah', 'the', 'hat']
-//
-// array(arr1, arr2)
-//
-// const te1 = ['The', 'cat', 'in', 'the', 'hat']
-// const te2 = ['The', 'ox', 'in', 'the', 'box']
-
-// console.log(trim(arr1, arr2))
 
 module.exports = {
   diffArray
