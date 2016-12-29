@@ -1,8 +1,5 @@
 'use strict'
 
-const { isArray } = require('../helpers/array')
-const { isObject } = require('../helpers/object')
-const { isString, isBool, isNum } = require('../helpers/primitive')
 const { equal, typeOf } = require('../helpers/equal')
 // const { diffArray } = require('./arrays')
 // const { diffObject, diffEmptyObject } = require('./objects')
@@ -32,7 +29,7 @@ const after = {
   __v: 1
 }
 
-console.log(_diff(before, after), null, 2)
+console.log(JSON.stringify(_diff(before, after), null, 2))
 
 function _diff (o1, o2) {
   const events = {
@@ -58,22 +55,24 @@ function diff (o1, o2, node, path, events) {
   if (!equal(o1, o2)) {
     node = !isNaN(parseInt(node, 10)) ? parseInt(node, 10) : node
     let p = node ? path.concat(node) : path
-    p = p.length === 0 ? p.concat(node) : p
 
     if (typeOf(o2) === 'object') {
-      return diffObject(o1, o2, p, events)
+      diffObject(o1, o2, p, events)
+      return
     }
 
     if (typeOf(o2) === 'array') {
-      return diffArray(o1, o2, p, events)
+      diffArray(o1, o2, p, events)
+      return
     }
 
-    return diffValue(o1, o2, p, events)
+    diffValue(o1, o2, p, events)
   }
 }
 
 
-function diffEmptyObject(o1, o2, path, events) {
+function diffEmptyObject(o1, o2, node, path, events) {
+
   if (o1 === undefined) {
     events.created.push(['DIFF_CREATE', path, o2])
     return
@@ -108,23 +107,26 @@ function diffObject (o1, o2, path, events) {
     const k1 = oKeys1[n1]
 
     if (o2[k1] === undefined) {
-      events.deleted.push(['DIFF_DELETE', path, o1[k1]])
+      events.deleted.push(['DIFF_DELETE', path.length === 0 ? path.concat(k1) : path, o1[k1]])
+      // Do the concat shorter
     }
   }
 
   for (let n2 in oKeys2) {
     // Insertion
     const k2 = oKeys2[n2]
+    console.log('k2=', k2)
 
     // console.log('k2=', k2)
     // console.log('o2[k2]=', o2[k2])
     // console.log('o1[k2]=', o1[k2])
 
     if (o1[k2] === undefined) {
-      events.created.push(['DIFF_CREATE', path, o2[k2]])
+      events.created.push(['DIFF_CREATE', path.length === 0 ? path.concat(k2) : path, o2[k2]])
     }
 
     if (o1[k2] && !equal(o1[k2], o2[k2])) {
+      console.log(o1[k2])
       diff(o1[k2], o2[k2], k2, path, events)
     }
   }
